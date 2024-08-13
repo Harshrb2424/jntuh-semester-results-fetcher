@@ -1,0 +1,2 @@
+# jntuh-semester-results-fetcher
+ A Python-based tool for fetching and storing semester results of multiple students from JNTUH-affiliated colleges. This repository provides a script that retrieves results from the university's official portals, processes the data, and stores it in JSON format for easy access and analysis. Ideal for academic institutions, students, and developers looking to automate the retrieval and management of academic results.

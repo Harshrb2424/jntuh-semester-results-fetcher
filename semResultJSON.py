@@ -1,3 +1,7 @@
+
+import requests
+import json
+from bs4 import BeautifulSoup
 def generate_trimmed_array(prefix, start_digit, end_digit):
     # Create the initial array
     array = [f"{i:02d}" for i in range(1, 100)]  # Numbers from 01 to 99
@@ -18,10 +22,6 @@ def generate_trimmed_array(prefix, start_digit, end_digit):
     modified_array = [f"{prefix}{item}" for item in trimmed_array]
 
     return modified_array
-
-import requests
-import json
-from bs4 import BeautifulSoup
 
 def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
     # Load existing data from JSON file
@@ -101,20 +101,31 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
             # Continue with the next iteration
             continue
     
-    
+    with open(output_file, 'r') as file:
+        data = json.load(file)
+
+    # Sort the data by personal_info.HTNO
+    sorted_data = sorted(data, key=lambda x: x['personal_info']['HTNO'])
+
+    # Write the sorted data back to a file
+    with open(output_file, 'w') as file:
+        json.dump(sorted_data, file, indent=4)
     print(f"Data has been updated and saved to {output_file}")
 
 # Example usage
-prefix = '22Q91A66'
-start_digit = '01'
-end_digit = '91'
-# modified_array = generate_trimmed_array(prefix, start_digit, end_digit)
-# Example usage
-# hall_ticket_numbers = ['23Q95A6608', '23Q95A6615']  # Add your list of hall ticket numbers here
-url = 'http://results.jntuh.ac.in/resultAction'  # Replace with the actual URL
-code = 1771
-sem = '2-1'
+prefix = input("Enter the prefix (e.g., '22Q91A66'): ")
+start_digit = input("Enter the start digit (e.g., '01'): ")
+end_digit = input("Enter the end digit (e.g., '91'): ")
+code = int(input("Enter the code (e.g., 1771): "))
+sem = input("Enter the semester (e.g., '2-1'): ")
+# prefix = '22Q91A66'
+# start_digit = '01'
+# end_digit = '91'
+# hall_ticket_numbers = ['23Q95A6601', '23Q95A6691']
+# code = 1771
+# sem = '2-1'
+url = 'http://results.jntuh.ac.in/resultAction'
 output_file=f"results/{prefix[2:4]}_{prefix[-2:]}_{sem}_data.json"
-hall_ticket_numbers = generate_trimmed_array(prefix, start_digit, end_digit)  # Add your list of hall ticket numbers here
+hall_ticket_numbers = generate_trimmed_array(prefix, start_digit, end_digit)
 print(hall_ticket_numbers)
 fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file)

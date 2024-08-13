@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student SGPA Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        th.sort-asc::after {
+            content: " ↑";
+        }
+        th.sort-desc::after {
+            content: " ↓";
+        }
+        .container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Student SGPA Report</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th data-column="name">Name</th>
+                    <th data-column="htno">Hall Ticket Number</th>
+                    <th data-column="totalMarks">Total Marks</th>
+                    <th data-column="sgpa">SGPA</th>
+                </tr>
+            </thead>
+            <tbody id="student-table">
+                <!-- Data will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+         function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('results/Q9_66_2-1_data.json')
+                .then(response => response.json())
+                .then(jsonData => {
+                    const gradePoints = {
+                        "O": 10,
+                        "A+": 9,
+                        "A": 8,
+                        "B+": 7,
+                        "B": 6,
+                        "C": 5,
+                        "F": 0
+                    };
+
+                    function calculateSGPA(subjects) {
+                        let totalPoints = 0;
+                        let totalCredits = 0;
+                        let totalMarks = 0;
+                        subjects.forEach(subject => {
+                            const grade = subject.grade;
+                            const credits = parseFloat(subject.credits);
+                            const points = gradePoints[grade] || 0;
+                            totalPoints += points * credits;
+                            totalCredits += credits;
+                            totalMarks += parseFloat(subject.total);
+                        });
+                        return {
+                            sgpa: (totalCredits === 0) ? 0 : (totalPoints / totalCredits).toFixed(2),
+                            totalMarks: totalMarks
+                        };
+                    }
+
+                    const tableBody = document.getElementById('student-table');
+
+                    jsonData.forEach(student => {
+                        const { sgpa, totalMarks } = calculateSGPA(student.subject_details);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${student.personal_info.NAME}</td>
+                            <td>${student.personal_info.HTNO}</td>
+                            <td>${totalMarks}</td>
+                            <td>${sgpa}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    // Sorting functionality
+                    const table = document.querySelector('table');
+                    const headers = table.querySelectorAll('th');
+
+                    headers.forEach(header => {
+                        header.addEventListener('click', () => {
+                            const column = header.dataset.column;
+                            const rowsArray = Array.from(table.querySelectorAll('tbody tr'));
+                            const isAscending = header.classList.contains('sort-asc');
+                            const direction = isAscending ? 'desc' : 'asc';
+
+                            rowsArray.sort((a, b) => {
+                                const aText = a.querySelector(`td:nth-child(${header.cellIndex + 1})`).textContent;
+                                const bText = b.querySelector(`td:nth-child(${header.cellIndex + 1})`).textContent;
+                                const aValue = isNaN(aText) ? aText : parseFloat(aText);
+                                const bValue = isNaN(bText) ? bText : parseFloat(bText);
+
+                                if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+                                if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+                                return 0;
+                            });
+
+                            rowsArray.forEach(row => table.querySelector('tbody').appendChild(row));
+
+                            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                            header.classList.add(`sort-${direction}`);
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching the JSON data:', error));
+        });
+    </script>
+</body>
+</html>

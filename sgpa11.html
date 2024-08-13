@@ -61,7 +61,7 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('2-1_CSM_data.json')
+            fetch('results/Q9_66_1-1_data.json')
                 .then(response => response.json())
                 .then(jsonData => {
                     const gradePoints = {

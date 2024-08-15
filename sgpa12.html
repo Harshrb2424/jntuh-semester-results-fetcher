@@ -54,11 +54,10 @@
     </div>
 
     <script>
-         function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        function capitalizeAfterDelimiter(str) {
+            return str.toLowerCase().replace(/(?:^|\s|\.)\w/g, function(match) {
+                return match.toUpperCase();
+            });
         }
         document.addEventListener('DOMContentLoaded', function() {
             fetch('results/Q9_66_1-2_data.json')
@@ -98,7 +97,7 @@
                         const { sgpa, totalMarks } = calculateSGPA(student.subject_details);
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${student.personal_info.NAME}</td>
+                            <td>${capitalizeAfterDelimiter(student.personal_info.NAME)}</td>
                             <td>${student.personal_info.HTNO}</td>
                             <td>${totalMarks}</td>
                             <td>${sgpa}</td>

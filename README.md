@@ -58,6 +58,21 @@ The `sgpaUploadJSON.html` file provides a web interface to upload the JSON file 
 4. **View and Sort Data:**
    Once uploaded, the web interface will display the results. You can view CGPA and use the sorting options to organize the data as required.
 
+## CSV Data Update Script
+
+This script updates existing CSV files with new data from a JSON file. It appends only distinct records that are not already present in the existing CSV files. The script handles personal information and subject details, maintaining the integrity and uniqueness of the data.
+
+### Files
+
+- `data.json`: Contains the new data to be merged into the existing CSV files. The JSON structure includes personal information and subject details.
+- `personal_info.csv`: Stores personal information of individuals.
+- `subject_details.csv`: Stores subject details related to each individual.
+
+### Dependencies
+
+The script requires the following Python libraries:
+- `pandas`
+
 ### Contributing
 
 Feel free to submit issues and pull requests to enhance the functionality of this project.

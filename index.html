@@ -60,6 +60,12 @@
         </table>
     </div>
     <script>
+        
+        function capitalizeAfterDelimiter(str) {
+                return str.toLowerCase().replace(/(?:^|\s|\.)\w/g, function(match) {
+                    return match.toUpperCase();
+                });
+        }
         $(document).ready(function() {
             $('#uploadForm').on('submit', function(event) {
                 event.preventDefault(); // Prevent form from submitting the default way
@@ -108,7 +114,7 @@
                         const { sgpa, totalMarks } = calculateSGPA(student.subject_details);
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${student.personal_info.NAME}</td>
+                            <td>${capitalizeAfterDelimiter(student.personal_info.NAME)}</td>
                             <td>${student.personal_info.HTNO}</td>
                             <td>${totalMarks}</td>
                             <td>${sgpa}</td>

@@ -13,12 +13,8 @@ def generate_trimmed_array(prefix, start_digit, end_digit):
 
     # Find indices for the start and end digits
     start_index = array.index(start_digit)
-    end_index = array.index(end_digit) + 1  # Slice is exclusive of end index
-
-    # Trim the array
+    end_index = array.index(end_digit) + 1 
     trimmed_array = array[start_index:end_index]
-
-    # Prepend '22Q91A66' to each element
     modified_array = [f"{prefix}{item}" for item in trimmed_array]
 
     return modified_array
@@ -35,8 +31,6 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
     for htno in hall_ticket_numbers:
         try:
             print(f"Processing Hall Ticket Number: {htno}")
-            
-            # Data to be sent with the POST request
             data = {
                 'degree': 'btech',
                 'examCode': code,
@@ -46,14 +40,11 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
                 'type': 'intgrade',
                 'htno': htno
             }
-            
             # Send POST request
             response = requests.post(url, data=data)
             html_content = response.text
-            
             # Parse the HTML using BeautifulSoup
             soup = BeautifulSoup(html_content, 'html.parser')
-            
             # Extract personal information
             personal_info_table = soup.find_all('table')[0]
             personal_info = {}
@@ -69,7 +60,6 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
                         personal_info[key] = value
             personal_info['sem'] = sem
             result_data = {'personal_info': personal_info}
-            
             # Extract subject details
             subject_table = soup.find_all('table')[1]
             subject_data = []
@@ -88,7 +78,6 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
                     subject_data.append(entry)
             
             result_data['subject_details'] = subject_data
-            
             # Append the new data to existing data
             existing_data.append(result_data)
     # Save the updated data to JSON file
@@ -96,18 +85,12 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
                 json.dump(existing_data, json_file, indent=4)
     
         except Exception as e:
-        # Handle the exception (optional)
             print(f"An error occurred with {htno}: {e}")
-            # Continue with the next iteration
             continue
     
     with open(output_file, 'r') as file:
         data = json.load(file)
-
-    # Sort the data by personal_info.HTNO
     sorted_data = sorted(data, key=lambda x: x['personal_info']['HTNO'])
-
-    # Write the sorted data back to a file
     with open(output_file, 'w') as file:
         json.dump(sorted_data, file, indent=4)
     print(f"Data has been updated and saved to {output_file}")

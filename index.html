@@ -46,7 +46,7 @@
     <div class="container">
         <h1>Student SGPA Report</h1>
         <table>
-            <thead>
+            <thead id="table-head">
                 <tr>
                     <th data-column="name">Name</th>
                     <th data-column="htno">Hall Ticket Number</th>
@@ -108,9 +108,20 @@
                         };
                     }
 
-                    const tableBody = document.getElementById('student-table');
+                    
 
+                    const tableBody = document.getElementById('student-table');
+                    jsonData[0].subject_details.sort((a, b) => a.subject_name.localeCompare(b.subject_name));
+                    // Iterate over the sorted subject_details and append each subject_name as a table header
+                    jsonData[0].subject_details.forEach(sub => {
+                        console.log(sub);
+                        $('#table-head tr').append(`<th data-column="${sub.subject_code}">${sub.subject_name}</th>`);
+                    });
                     jsonData.forEach(student => {
+                        student.subject_details.sort((a, b) => {
+                            // Assuming subject_name is a string, we can use localeCompare for a string comparison
+                            return a.subject_name.localeCompare(b.subject_name);
+                        });
                         const { sgpa, totalMarks } = calculateSGPA(student.subject_details);
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -119,8 +130,14 @@
                             <td>${totalMarks}</td>
                             <td>${sgpa}</td>
                         `;
+                        
+                        student.subject_details.forEach(subject => {
+                            row.insertAdjacentHTML('beforeend', `<td>${subject.total}</td>`);
+                        });
+
                         tableBody.appendChild(row);
                     });
+
 
                     // Sorting functionality
                     const table = document.querySelector('table');

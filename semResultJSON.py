@@ -1,4 +1,4 @@
-
+import os
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -29,64 +29,73 @@ def fetch_and_save_results(hall_ticket_numbers, url, code, sem, output_file):
 
     # Process each hall ticket number
     for htno in hall_ticket_numbers:
-        try:
-            print(f"Processing Hall Ticket Number: {htno}")
-            data = {
-                'degree': 'btech',
-                'examCode': code,
-                'etype': 'r17',
-                'result': 'null',
-                'grad': 'null',
-                'type': 'intgrade',
-                'htno': htno
-            }
-            # Send POST request
-            response = requests.post(url, data=data)
-            html_content = response.text
-            # Parse the HTML using BeautifulSoup
-            soup = BeautifulSoup(html_content, 'html.parser')
-            # Extract personal information
-            personal_info_table = soup.find_all('table')[0]
-            personal_info = {}
-            for row in personal_info_table.find_all('tr'):
-                cols = row.find_all('td')
-                if len(cols) > 1:
-                    key = cols[0].get_text(strip=True).strip(':')
-                    value = cols[1].get_text(strip=True)
-                    personal_info[key] = value
-                    if len(cols) > 2:
-                        key = cols[2].get_text(strip=True).strip(':')
-                        value = cols[3].get_text(strip=True)
+        if any(entry['personal_info']['HTNO'] == htno for entry in existing_data):
+            print(f"{htno} is already present, skipping.")
+        else:
+            print(f"{htno} is not present.")
+            try:
+                print(f"Processing Hall Ticket Number: {htno}")
+                data = {
+                    'degree': 'btech',
+                    'examCode': code,
+                    'etype': 'r17',
+                    'result': 'null',
+                    'grad': 'null',
+                    'type': 'intgrade',
+                    'htno': htno
+                }
+                # Send POST request
+                response = requests.post(url, data=data)
+                html_content = response.text
+                # Save HTML File
+                file_path = f'results/html/{sem}_{htno}.html'
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(html_content)
+                # Parse the HTML using BeautifulSoup
+                soup = BeautifulSoup(html_content, 'html.parser')
+                # Extract personal information
+                personal_info_table = soup.find_all('table')[0]
+                personal_info = {}
+                for row in personal_info_table.find_all('tr'):
+                    cols = row.find_all('td')
+                    if len(cols) > 1:
+                        key = cols[0].get_text(strip=True).strip(':')
+                        value = cols[1].get_text(strip=True)
                         personal_info[key] = value
-            personal_info['sem'] = sem
-            result_data = {'personal_info': personal_info}
-            # Extract subject details
-            subject_table = soup.find_all('table')[1]
-            subject_data = []
-            for row in subject_table.find_all('tr')[1:]:  # Skip the header row
-                cols = row.find_all('td')
-                if len(cols) > 0:
-                    entry = {
-                        'subject_code': cols[0].get_text(strip=True),
-                        'subject_name': cols[1].get_text(strip=True),
-                        'internal': cols[2].get_text(strip=True),
-                        'external': cols[3].get_text(strip=True),
-                        'total': cols[4].get_text(strip=True),
-                        'grade': cols[5].get_text(strip=True),
-                        'credits': cols[6].get_text(strip=True)
-                    }
-                    subject_data.append(entry)
-            
-            result_data['subject_details'] = subject_data
-            # Append the new data to existing data
-            existing_data.append(result_data)
-    # Save the updated data to JSON file
-            with open(output_file, 'w') as json_file:
-                json.dump(existing_data, json_file, indent=4)
-    
-        except Exception as e:
-            print(f"An error occurred with {htno}: {e}")
-            continue
+                        if len(cols) > 2:
+                            key = cols[2].get_text(strip=True).strip(':')
+                            value = cols[3].get_text(strip=True)
+                            personal_info[key] = value
+                personal_info['sem'] = sem
+                result_data = {'personal_info': personal_info}
+                # Extract subject details
+                subject_table = soup.find_all('table')[1]
+                subject_data = []
+                for row in subject_table.find_all('tr')[1:]:  # Skip the header row
+                    cols = row.find_all('td')
+                    if len(cols) > 0:
+                        entry = {
+                            'subject_code': cols[0].get_text(strip=True),
+                            'subject_name': cols[1].get_text(strip=True),
+                            'internal': cols[2].get_text(strip=True),
+                            'external': cols[3].get_text(strip=True),
+                            'total': cols[4].get_text(strip=True),
+                            'grade': cols[5].get_text(strip=True),
+                            'credits': cols[6].get_text(strip=True)
+                        }
+                        subject_data.append(entry)
+                
+                result_data['subject_details'] = subject_data
+                # Append the new data to existing data
+                existing_data.append(result_data)
+        # Save the updated data to JSON file
+                with open(output_file, 'w') as json_file:
+                    json.dump(existing_data, json_file, indent=4)
+        
+            except Exception as e:
+                print(f"An error occurred with {htno}: {e}")
+                continue
     
     with open(output_file, 'r') as file:
         data = json.load(file)

@@ -8,9 +8,22 @@
 </head>
 
 <body>
+http://202.63.105.184/results/jsp/SearchResult.jsp?degree=btech&examCode=1921&etype=r17&type=intgrade
+
+
   <form target="_blank" id="myForm" name="searchResult" action="http://results.jntuh.ac.in/resultAction" method="post">
     <input type="hidden" name="degree" value="btech" />
-    <input type="text" name="examCode" value="1784" />
+    <input type="text" name="examCode" value="1921" />
+    <input type="hidden" name="etype" value="r17" />
+    <input type="hidden" name="result" value="null" />
+    <input type="hidden" name="grad" value="null" />
+    <input type="hidden" name="type" value="intgrade" />
+    <input type="text" name="htno" required="required" id="htno" />
+    <input type="submit" value="Submit" />
+  </form>
+<form target="_blank" id="myForm" name="searchResult" action="http://202.63.105.184/results/resultAction" method="post">
+    <input type="hidden" name="degree" value="btech" />
+    <input type="text" name="examCode" value="1921" />
     <input type="hidden" name="etype" value="r17" />
     <input type="hidden" name="result" value="null" />
     <input type="hidden" name="grad" value="null" />
